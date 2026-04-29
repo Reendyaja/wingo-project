@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wingo VIP Predictor</title>
+    <style>
+        :root { --accent: #facc15; --bg: #020617; --card: #0f172a; }
+        body { background: var(--bg); color: #fff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .box { border: 2px solid var(--accent); background: var(--card); padding: 25px; border-radius: 20px; width: 300px; text-align: center; box-shadow: 0 0 30px rgba(250, 204, 21, 0.2); }
+        .header { color: var(--accent); font-weight: bold; margin-bottom: 20px; border-bottom: 1px solid #1e293b; padding-bottom: 10px; text-transform: uppercase; }
+        .row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; }
+        .val { font-weight: bold; }
+        #pred { color: var(--accent); font-size: 22px; }
+        .denied { display: none; }
+        .btn-reg { display: inline-block; background: var(--accent); color: #000; text-decoration: none; padding: 12px 20px; border-radius: 10px; font-weight: bold; margin-top: 15px; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <div id="data-view">
+            <div class="header">VIP Predictor</div>
+            <div class="row"><span>Time:</span><span id="time" class="val">--s</span></div>
+            <div class="row"><span>Periode:</span><span id="period" class="val">--</span></div>
+            <div class="row"><span>Prediksi:</span><span id="pred" class="val">--</span></div>
+            <div class="row"><span>Result:</span><span id="last" class="val">--</span></div>
+        </div>
+        <div id="denied-view" class="denied">
+            <div class="header" style="color:#ef4444; border-color:#ef4444;">Akses Ditolak</div>
+            <p style="font-size:13px; color:#94a3b8;">UID Anda tidak terdaftar sebagai member VIP kami.</p>
+            <a href="https://luminastore.fun/register?invitationCode=069412757283" class="btn-reg">DAFTAR SEKARANG</a>
+        </div>
+    </div>
+    <script>
+        async function update() {
+            try {
+                const res = await fetch('/api/get-data');
+                const json = await res.json();
+                if (res.status === 403) {
+                    document.getElementById('data-view').style.display = 'none';
+                    document.getElementById('denied-view').style.display = 'block';
+                    return;
+                }
+                const g = json.data.gameslist;
+                document.getElementById('time').innerText = (60 - new Date().getSeconds()) + 's';
+                document.getElementById('period').innerText = g[g.length-1].period;
+                const p = (parseInt(g[0].amount) + parseInt(g[2].amount)) % 10;
+                document.getElementById('pred').innerText = `${p} (${p >= 5 ? 'BESAR' : 'KECIL'})`;
+                document.getElementById('last').innerText = g[0].amount;
+            } catch (e) {}
+        }
+        setInterval(update, 2000); update();
+    </script>
+</body>
+</html>
